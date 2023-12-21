@@ -103,13 +103,11 @@ class Superban extends ThrottleRequests
 
     protected function banUser(Request $request, array $headers)
     {
-        $expirationTimestamp = now()->addMinutes($this->banTime);
-
         $data = $this->getRequestData($request);
 
         foreach ($data as $key) {
             foreach ($this->getCacheStores() as $store) {
-                $store->put($key, true, strtotime($expirationTimestamp));
+                $store->put($key, true, $this->banTime * 60);
             }
         }
 
@@ -145,10 +143,9 @@ class Superban extends ThrottleRequests
     protected function getCacheStores()
     {
         $drivers = config('superban.drivers');
-        $resolved = [];
 
         if (count($drivers)) {
-            return array_map(function ($driver) use (&$resolved) {
+            return array_map(function ($driver) {
                 return Cache::driver($driver) ?? Cache::driver();
             }, $drivers);
         }
