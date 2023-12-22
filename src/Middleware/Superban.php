@@ -166,7 +166,9 @@ class Superban extends ThrottleRequests
         $keys = $config['user_keys'] ?? [];
         $user = $request->user();
         $ipAddress = true;
-        if ($config) {
+        if (!$config) {
+            $ipAddress = $request->ip();
+        } else {
             $ipAddress = config('superban.ban_ip_addresses') ? $request->ip() : null;
         }
         $data = [];
