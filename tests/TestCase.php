@@ -13,10 +13,6 @@ class TestCase extends BaseTestCase
      *
      * @return void
      */
-    public function setUp(): void
-    {
-        parent::setUp();
-    }
 
     protected function getPackageProviders($app)
     {
@@ -35,7 +31,7 @@ class TestCase extends BaseTestCase
     {
         tap($app['config'], function (Repository $config) {
             $config->set('superban.drivers', [
-                'file',
+                'array',
             ]);
         });
     }

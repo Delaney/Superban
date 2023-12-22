@@ -6,22 +6,12 @@ include_once __DIR__.'/../helpers/helpers.php';
 
 use DateInterval;
 use DateTime;
-use Delaney\Superban\Middleware\Superban;
-use Delaney\Superban\SuperbanServiceProvider;
 use Delaney\Superban\Tests\TestCase;
-use Illuminate\Http\Request;
-use Illuminate\Routing\Route;
-use Illuminate\Support\Facades\Cache;
-use Symfony\Component\HttpFoundation\Response;
+use Orchestra\Testbench\Factories\UserFactory;
 
 class SuperbanTest extends TestCase
 {
     protected $uri;
-
-    public function setUp(): void
-    {
-        parent::setUp();
-    }
 
     /**
      * Define routes setup.
@@ -33,8 +23,13 @@ class SuperbanTest extends TestCase
     {
         $this->uri = 'api/' . generateRandomString();
         $router->get($this->uri, function () {
-            })
+        })
             ->middleware('superban:20,2,1440');
+    }
+
+    protected function usesArrayCache($app)
+    {
+        $app['config']->set('superban.drivers', ['array']);
     }
 
     /**
@@ -42,8 +37,11 @@ class SuperbanTest extends TestCase
      *
      * @test
      */
+    #[Test]
+    #[DefineEnvironment('usesArrayCache')]
     public function it_bans_a_user_successfully()
     {
+        $user = (new UserFactory(1))->make()->first();
         $maxAttempts = 20;
         $now = new DateTime();
         $headers = ['X-Requested-With' => 'XMLHttpRequest'];
@@ -59,20 +57,22 @@ class SuperbanTest extends TestCase
 
         // Exhaust attempts
         for ($x = $maxAttempts; $x > 0; $x--) {
-            $response = $this->json(
+            $response = $this->actingAs($user)
+                ->json(
+                    'GET',
+                    $this->uri,
+                    [],
+                    $headers
+                );
+        }
+
+        $response = $this->actingAs($user)
+            ->json(
                 'GET',
                 $this->uri,
                 [],
                 $headers
             );
-        }
-
-        $response = $this->json(
-            'GET',
-            $this->uri,
-            [],
-            $headers
-        );
         $response->assertStatus(403);
         $this->assertStringContainsString("You have been banned temporarily.", $response->__toString());
 
