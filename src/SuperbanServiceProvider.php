@@ -10,6 +10,10 @@ class SuperbanServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->bootConfig();
+    }
+
+    public function register()
+    {
         $this->bootMiddleware();
     }
 
@@ -33,7 +37,7 @@ class SuperbanServiceProvider extends ServiceProvider
      */
     protected function bootMiddleware()
     {
-        $this->app->make('route')->aliasMiddleware(
+        $this->app->make('router')->aliasMiddleware(
             'superban',
             \Delaney\Superban\Middleware\Superban::class
         );
