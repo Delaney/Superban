@@ -25,7 +25,7 @@ class SuperbanServiceProvider extends ServiceProvider
     protected function bootConfig()
     {
         $this->publishes([
-            __DIR__.'/../config/courier.php' => config_path('superban.php'),
+            __DIR__.'/../config/superban.php' => config_path('superban.php'),
         ], 'superban');
     }
 
