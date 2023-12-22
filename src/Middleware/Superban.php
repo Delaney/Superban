@@ -162,9 +162,13 @@ class Superban extends ThrottleRequests
 
     protected function getRequestData(Request $request)
     {
-        $keys = config('superban.user_keys') ?? [];
+        $config = config('superban');
+        $keys = $config['user_keys'] ?? [];
         $user = $request->user();
-        $ipAddress = config('superban.ban_ip_addresses') ? $request->ip() : null;
+        $ipAddress = true;
+        if ($config) {
+            $ipAddress = config('superban.ban_ip_addresses') ? $request->ip() : null;
+        }
         $data = [];
 
         if ($ipAddress) {
